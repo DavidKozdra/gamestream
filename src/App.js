@@ -1,8 +1,15 @@
 import React, { useState } from "react";
 import socketIOClient from "socket.io-client";
 import Ballot from "./Components/Ballot";
-import Button from "./Components/Button";
 import ChatBox from "./Components/ChatBox";
+
+import Button from "@material-ui/core/Button";
+import ButtonGroup from "@material-ui/core/ButtonGroup";
+import { makeStyles } from "@material-ui/core/styles";
+import TextField from "@material-ui/core/TextField";
+import Paper from "@material-ui/core/Paper";
+import Box from "@material-ui/core/Box";
+
 const socket = socketIOClient("ws://localhost:8080");
 const username = "s";
 
@@ -28,6 +35,8 @@ function App() {
 	const [time, settime] = useState("");
 	const [message, setMessage] = useState("");
 	const [MessageLog, setMessagelog] = useState("");
+
+	const [options, setoptions] = useState("");
 
 	/*
     this can stay mostly the same but should go into the commponet
@@ -66,6 +75,7 @@ function App() {
 		// use react to do this winner != null ?? alert("You all picked option " + winner);
 		settime(0);
 		setvoted(false);
+		setoptions(options);
 		setprompt(prompt.title + " " + prompt.text + DisplayOptions(options));
 	});
 
@@ -96,43 +106,71 @@ function App() {
 		setMessage(event.target.value);
 	};
 
+	function afterSubmission(event) {
+		event.preventDefault();
+		MessageSend();
+	}
+
 	return (
 		<div>
-			<div>
-				<p> {prompt}</p>
-			</div>
+			<Box>
+				<input
+					className="slider-square"
+					type="range"
+					min="0"
+					max="70"
+					value={time}
+					onChange={slider}
+				></input>
 
-			<Ballot votes={ballot} />
-			<Button voted={voted} text="1" click={() => ClientVote(1)} />
-			<Button voted={voted} text="2" click={() => ClientVote(2)} />
-			<Button voted={voted} text="3" click={() => ClientVote(3)} />
-			<Button voted={voted} text="4" click={() => ClientVote(4)} />
+				<div>
+					<p> {prompt}</p>
+				</div>
 
-			<input
-				type="range"
-				min="0"
-				max="70"
-				value={time}
-				onChange={slider}
-			></input>
+				<Ballot votes={ballot} />
 
-			<ChatBox Log={MessageLog} />
-			<div>
-				<input placeholder="message" value={message} onChange={handleInput} />
-				<button onClick={() => MessageSend()}>Send</button>
-			</div>
+				<div>
+					<ButtonGroup
+						orientation="vertical"
+						color="primary"
+						aria-label="vertical contained primary button group"
+						variant="contained"
+					>
+						<Button disabled={voted} onClick={() => ClientVote(1)}>
+							{"1. " + options[0].title}
+						</Button>
+						<Button disabled={voted} onClick={() => ClientVote(2)}>
+							{"2. " + options[1].title}
+						</Button>
+						<Button disabled={voted} onClick={() => ClientVote(3)}>
+							{"3. " + options[2].title}
+						</Button>
+						<Button disabled={voted} onClick={() => ClientVote(4)}>
+							{"4. " + options[3].title}
+						</Button>
+					</ButtonGroup>
+				</div>
+
+				<ChatBox Log={MessageLog} />
+				<div>
+					<form
+						noValidate
+						autoComplete="off"
+						placeholder="message"
+						onSubmit={afterSubmission}
+					>
+						<TextField
+							id="standard-basic"
+							label={username}
+							value={message}
+							onChange={handleInput}
+						/>
+					</form>
+					<Button onClick={() => MessageSend()}>Send</Button>
+				</div>
+			</Box>
 		</div>
 	);
 }
-
-/*	
-		<div>
-				<input placeholder="message" value="" onChange={} />
-				<button id="send" onClick={MessageSend}>
-					Send
-				</button>
-				<ChatBox Log={MessageLog} />
-			</div>
-            */
 
 export default App;

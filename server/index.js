@@ -109,7 +109,6 @@ var time = 0;
 function tick() {
 	if (sum(votes) > 0) {
 		if (time != 70) {
-			//console.log("tick");
 			io.emit("tick", (time += 1));
 		} else {
 			CheckWinner();
